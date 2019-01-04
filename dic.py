@@ -50,7 +50,6 @@ DIC {{
     suppCounter:
     {pformat(self.suppCounter.most_common(), indent=2)}
     txnCounter: {pformat(self.txnCounter.most_common())}
-    txns: {pformat(self.txns)}
 }}
                 '''
 
@@ -84,10 +83,11 @@ DIC {{
         for item in self.items:
             if item in (self.SS | self.DS):
                 new = frozenset(item | itemset)
-                for subset in self.genSubsets(new):
-                    if subset in self.SC:
-                        return
-                self.DC.add(new)
+                if new == itemset:
+                    continue
+                subsets = set(self.genSubsets(new))
+                if subsets <= (self.SS | self.DS):
+                    self.DC.add(new)
 
     def genSubsets(self, itemset):
         l = len(itemset)
