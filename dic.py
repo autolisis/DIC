@@ -5,12 +5,26 @@
 # Copyright © 2019 g <g@ABCL>
 #
 # Distributed under terms of the MIT license.
+
+# For counting number of instances of an object
 from collections import Counter
+# For generating combinations of an itemset
 from itertools import cycle, combinations
+# For static typing (optional)
 from typing import Iterable, Counter, List, FrozenSet, Set, Any
 
 
 class DIC(object):
+    '''Class for Dynamic Itemset Counting Algorithm
+    Pass it an Iterable of Iterables (Eg. List of strings, or list of lists)
+    FrozenSet is used as normal mutable sets cannot be hashed (Used as keys in a dictionary or counter,
+    or inserted in a set)
+    So Dashed square, dashed circle etc. are sets of frozensets
+
+    Eg:
+    >>> print(DIC(['AB', 'A', 'BC', ''], minsupp=1, m=2))
+    '''
+
     def move(self, itemset, set2, set1):
         set1.discard(itemset)
         set2.add(itemset)
@@ -37,11 +51,13 @@ class DIC(object):
         self.SC: Set[FrozenSet] = set()
         self.SS: Set[FrozenSet] = set()
 
+        # Add all one itemsets to Dashed Circle
         self.DC |= self.items
 
         self.do()
 
     def __str__(self):
+        ''' Utility function to print the DIC Object '''
         from pprint import pformat
         return f'''
 DIC {{
@@ -54,6 +70,9 @@ DIC {{
                 '''
 
     def do(self):
+        ''' Implements DIC Algorithm
+        http://www2.cs.uregina.ca/~dbd/cs831/notes/itemsets/DIC.html
+        '''
         (DC, DS, SC, SS, txnCounter, suppCounter, txns, m,
          minsupp) = (self.DC, self.DS, self.SC, self.SS, self.txnCounter,
                      self.suppCounter, self.txns, self.m, self.minsupp)
@@ -64,6 +83,7 @@ DIC {{
             for i in range(m):
                 T.append(next(infTxns))
             for tx in T:
+                # For all itemsets that are dashed (in DC ∪ DS)
                 for itemset in DC | DS:
                     txnCounter[itemset] += 1
                     if itemset <= tx:
